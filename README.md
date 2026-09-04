@@ -75,7 +75,6 @@ movie-recommendation-system/
 │
 ├── movies.pkl
 ├── similarity.pkl
-└── movies_dict.pkl
 ```
 
 The CSV datasets and generated pickle files are not included in the Git repository because of their size.
@@ -163,7 +162,6 @@ This generates:
 ```text
 movies.pkl
 similarity.pkl
-movies_dict.pkl
 ```
 
 These files are required by the Streamlit application.
