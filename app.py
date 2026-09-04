@@ -13,7 +13,20 @@ if not TMDB_API_KEY:
 
 def fetch_poster(movie_id):
     url = "https://api.themoviedb.org/3/movie/{}?api_key={}&language=en-US".format(movie_id, TMDB_API_KEY)
-    data = requests.get(url)
+
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+    except (requests.RequestException, ValueError):
+        return "https://placehold.co/500x750?text=No+Poster"
+
+    poster_path = data.get("poster_path")
+
+    if not poster_path:
+        return "https://placehold.co/500x750?text=No+Poster"
+
+    return "https://image.tmdb.org/t/p/w500{}".format(poster_path)
 
 def recommend(movie):
     match = movies[movies['title'].str.lower() == movie.lower()]
