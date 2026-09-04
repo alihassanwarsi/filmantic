@@ -1,0 +1,22 @@
+# Secrets
+.env
+
+# Generated artifacts
+*.pkl
+
+# Dataset
+tmdb_5000_movies.csv
+tmdb_5000_credits.csv
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
