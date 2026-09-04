@@ -1,7 +1,7 @@
-numpy
-pandas
-scikit-learn
-nltk
-streamlit
-requests
-python-dotenv
+numpy==2.5.2
+pandas==3.0.5
+scikit-learn==1.9.0
+nltk==3.10.3
+streamlit==1.63.0
+requests==2.34.2
+python-dotenv==1.2.3
