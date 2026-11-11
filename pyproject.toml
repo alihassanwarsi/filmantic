@@ -1,0 +1,37 @@
+[project]
+name = "filmantic"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Ali Hassan Warsi", email = "contact.alix27@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "en-core-web-sm",
+    "numpy>=2.5.4",
+    "pandas>=3.1.1",
+    "python-dotenv>=1.2.4",
+    "requests>=2.34.2",
+    "scikit-learn>=1.9.1",
+    "sentence-transformers>=6.3.0",
+    "spacy>=3.8.18",
+    "streamlit>=1.67.0",
+]
+
+[project.scripts]
+filmantic = "filmantic:main"
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+en-core-web-sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl" }
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+    "pytest>=9.2.0",
+    "ruff>=0.17.4",
+]
