@@ -1,16 +1,31 @@
+import numpy as np
+import pandas as pd
 from sklearn.metrics.pairwise import linear_kernel
 
+from .config import PROCESSED_DATA_PATH
 from .data import load_movies
 from .features import build_tags, fit_tfidf
 
+MOVIES_CACHE = PROCESSED_DATA_PATH / "movies.pkl"
+SIMILARITY_CACHE = PROCESSED_DATA_PATH / "similarity.npy"
 
-def build_recommender():
+
+def build_recommender(rebuild=False):
     """Build a recommender system based on movie features."""
+
+    if not rebuild and MOVIES_CACHE.exists() and SIMILARITY_CACHE.exists():
+        df = pd.read_pickle(MOVIES_CACHE)
+        similarity = np.load(SIMILARITY_CACHE)
+        return df, similarity
 
     df = load_movies()
     tags = build_tags(df)
     _, vectors = fit_tfidf(tags)
     similarity = linear_kernel(vectors, vectors).astype("float32")
+
+    PROCESSED_DATA_PATH.mkdir(parents=True, exist_ok=True)
+    df.to_pickle(MOVIES_CACHE)
+    np.save(SIMILARITY_CACHE, similarity)
 
     return df, similarity
 
