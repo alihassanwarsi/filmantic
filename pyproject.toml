@@ -1,7 +1,7 @@
 [project]
 name = "filmantic"
 version = "0.1.0"
-description = "Add your description here"
+   description = "Content-based movie recommender using spaCy, TF-IDF and sentence embeddings"
 readme = "README.md"
 authors = [
     { name = "Ali Hassan Warsi", email = "contact.alix27@gmail.com" }
@@ -9,7 +9,6 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "en-core-web-sm",
-    "jupyter>=1.1.1",
     "numpy>=2.5.4",
     "pandas>=3.1.1",
     "python-dotenv>=1.2.4",

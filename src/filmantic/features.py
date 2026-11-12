@@ -1,5 +1,4 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
-from filmantic.data import load_movies
 from .preprocess import lemmatize
 
 def squash(names):
@@ -35,6 +34,7 @@ def fit_tfidf(tags, max_features=5000):
     return vectorizer, vectors
 
 if __name__ == "__main__":
+    from .data import load_movies
     df = load_movies()
     tags = build_tags(df)
     print(tags[0])
