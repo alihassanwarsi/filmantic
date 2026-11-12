@@ -1,13 +1,19 @@
+from functools import lru_cache
+
 import spacy
 
 KEEP = {"NOUN", "PROPN", "VERB", "ADJ"}
 
-nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
+
+@lru_cache(maxsize=1)
+def _get_nlp():
+    return spacy.load("en_core_web_sm", disable=["parser", "ner"])
 
 
 def lemmatize(texts):
     """Take a list of texts and return a list of cleaned texts made of lemmas"""
 
+    nlp = _get_nlp()
     cleaned = []
 
     for doc in nlp.pipe(texts):
