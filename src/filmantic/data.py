@@ -16,10 +16,13 @@ def _parse_names(text, limit=None):
 def _director(text):
     """Find and return the director's name from the movie crew list."""
 
-    for item in ast.literal_eval(text):
-        if item["job"] == "Director":
-            return item["name"]
-        
+    try:
+        for item in ast.literal_eval(text):
+            if item.get("job") == "Director":
+                return item.get("name", "")
+    except (ValueError, TypeError, SyntaxError, AttributeError):
+        return ""
+
     return ""
 
 def load_movies():
