@@ -1,10 +1,13 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
+
 from .preprocess import lemmatize
+
 
 def squash(names):
     """Remove spaces from names and lowercase them."""
 
     return [n.replace(" ", "").lower() for n in names if n]
+
 
 def build_tags(df):
     """Combine movie features into a single text string for each movie."""
@@ -25,6 +28,7 @@ def build_tags(df):
 
     return tags
 
+
 def fit_tfidf(tags, max_features=5000):
     """Convert tags into TF-IDF vectors and return vectorizer and vectors"""
 
@@ -33,8 +37,10 @@ def fit_tfidf(tags, max_features=5000):
 
     return vectorizer, vectors
 
+
 if __name__ == "__main__":
     from .data import load_movies
+
     df = load_movies()
     tags = build_tags(df)
     print(tags[0])
