@@ -1,6 +1,9 @@
 import ast
+
 import pandas as pd
+
 from .config import RAW_DATA_PATH
+
 
 def _parse_names(text, limit=None):
     """Extract names from text containing a list of dictionaries."""
@@ -13,6 +16,7 @@ def _parse_names(text, limit=None):
 
     return names[:limit] if limit else names
 
+
 def _director(text):
     """Find and return the director's name from the movie crew list."""
 
@@ -24,6 +28,7 @@ def _director(text):
         return ""
 
     return ""
+
 
 def load_movies():
     """Load datasets, combine them, and return processed dataset"""
@@ -42,6 +47,7 @@ def load_movies():
     df["director"] = df["crew"].apply(_director)
 
     return df.drop(columns="crew")
+
 
 if __name__ == "__main__":
     df = load_movies()
