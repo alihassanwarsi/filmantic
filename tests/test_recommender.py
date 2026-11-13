@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from filmantic.recommender import recommend_movies
+from filmantic.recommender import find_movie_ids, recommend_movies
 
 
 @pytest.fixture
@@ -27,21 +27,26 @@ def tiny():
 
 def test_results_are_sorted_and_exclude_the_movie_itself(tiny):
     df, sim = tiny
-    result = recommend_movies("Alpha", df, sim, n=3)
+    result = recommend_movies(1, df, sim, n=3)
     assert result["title"].tolist() == ["Beta", "Delta", "Gamma"]
 
 
 def test_n_limits_results(tiny):
     df, sim = tiny
-    assert len(recommend_movies("Alpha", df, sim, n=2)) == 2
+    assert len(recommend_movies(1, df, sim, n=2)) == 2
 
 
-def test_title_match_is_case_insensitive(tiny):
-    df, sim = tiny
-    assert recommend_movies("alpha", df, sim, n=1)["title"].iloc[0] == "Beta"
-
-
-def test_unknown_title_raises_keyerror(tiny):
+def test_unknown_id_raises_keyerror(tiny):
     df, sim = tiny
     with pytest.raises(KeyError):
-        recommend_movies("Nope", df, sim)
+        recommend_movies(999, df, sim)
+
+
+def test_find_movie_ids_is_case_insensitive(tiny):
+    df, _ = tiny
+    assert find_movie_ids("alpha", df) == [1]
+
+
+def test_find_movie_ids_returns_all_duplicates():
+    df = pd.DataFrame({"movie_id": [268, 2661], "title": ["Batman", "Batman"]})
+    assert find_movie_ids("batman", df) == [268, 2661]
