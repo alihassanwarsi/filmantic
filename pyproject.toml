@@ -35,3 +35,6 @@ dev = [
     "pytest>=9.2.0",
     "ruff>=0.17.4",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"notebooks/02_movielens_check.ipynb" = ["F821"]
