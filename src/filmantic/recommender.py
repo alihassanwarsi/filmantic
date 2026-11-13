@@ -30,15 +30,21 @@ def build_recommender(rebuild=False):
     return df, similarity
 
 
-def recommend_movies(title, df, similarity, n=5):
-    """Find and return the most similar movies based on a given title."""
+def find_movie_ids(title, df):
+    """Find and return movie id based on a given title."""
 
-    matched = df[df["title"].str.lower() == title.lower()]
+    return df.loc[df["title"].str.lower() == title.lower(), "movie_id"].tolist()
+
+
+def recommend_movies(movie_id, df, similarity, n=5):
+    """Find and return the most similar movies for a given movie id."""
+
+    matched = df.index[df["movie_id"] == movie_id]
 
     if matched.empty:
-        raise KeyError(f"Movie '{title}' not found in the dataset.")
+        raise KeyError(f"Movie id {movie_id} not found in the dataset.")
 
-    index = matched.index[0]
+    index = matched[0]
 
     result = df[["movie_id", "title"]].copy()
     result["score"] = similarity[index]
@@ -49,4 +55,5 @@ def recommend_movies(title, df, similarity, n=5):
 
 if __name__ == "__main__":
     df, similarity = build_recommender()
-    print(recommend_movies("Interstellar", df, similarity))
+    movie_id = find_movie_ids("Interstellar", df)[0]
+    print(recommend_movies(movie_id, df, similarity))
