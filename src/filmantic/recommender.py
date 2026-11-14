@@ -76,6 +76,34 @@ def recommend_embedding(movie_id, df, embeddings, n=5):
     return result
 
 
+def recommend_hybrid(movie_id, df, tfidf_similarity, embeddings, n=5, k=60):
+    """Recommend movies using Reciprocal Rank Fusion."""
+
+    matched = df.index[df["movie_id"] == movie_id]
+
+    if matched.empty:
+        raise KeyError(f"Movie id {movie_id} not found.")
+
+    index = matched[0]
+
+    tfidf_scores = tfidf_similarity[index]
+    embedding_scores = embeddings @ embeddings[index]
+
+    tfidf_ranks = np.argsort(np.argsort(-tfidf_scores))
+    embedding_ranks = np.argsort(np.argsort(-embedding_scores))
+
+    rrf_scores = 1 / (k + tfidf_ranks + 1) + 1 / (k + embedding_ranks + 1)
+
+    rrf_scores[index] = 0
+
+    top_indices = np.argsort(rrf_scores)[::-1][:n]
+
+    result = df.iloc[top_indices][["movie_id", "title"]].copy()
+    result["score"] = rrf_scores[top_indices]
+
+    return result
+
+
 if __name__ == "__main__":
     df, similarity = build_recommender()
 
@@ -88,3 +116,6 @@ if __name__ == "__main__":
 
     print("\nEmbedding recommendations:")
     print(recommend_embedding(movie_id, df, embeddings))
+
+    print("\nHybrid (RRF) recommendations:")
+    print(recommend_hybrid(movie_id, df, similarity, embeddings))
