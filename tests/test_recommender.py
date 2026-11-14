@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from filmantic.recommender import find_movie_ids, recommend_movies
+from filmantic.recommender import find_movie_ids, recommend_embedding, recommend_movies
 
 
 @pytest.fixture
@@ -50,3 +50,36 @@ def test_find_movie_ids_is_case_insensitive(tiny):
 def test_find_movie_ids_returns_all_duplicates():
     df = pd.DataFrame({"movie_id": [268, 2661], "title": ["Batman", "Batman"]})
     assert find_movie_ids("batman", df) == [268, 2661]
+
+
+@pytest.fixture
+def tiny_embeddings(tiny):
+    df, _ = tiny
+    embeddings = np.array(
+        [
+            [1.0, 0.0],
+            [0.9, 0.1],
+            [0.0, 1.0],
+            [0.5, 0.5],
+        ],
+        dtype="float32",
+    )
+    return df, embeddings
+
+
+def test_recommend_embedding(tiny_embeddings):
+    df, emb = tiny_embeddings
+    result = recommend_embedding(1, df, emb, n=2)
+    assert result["title"].tolist() == ["Beta", "Delta"]
+    assert len(result) == 2
+
+
+def test_recommend_embedding_unknown_id_raises_keyerror(tiny_embeddings):
+    df, emb = tiny_embeddings
+    with pytest.raises(KeyError):
+        recommend_embedding(999, df, emb)
+
+
+def test_find_movie_ids_returns_empty_list_when_not_found(tiny):
+    df, _ = tiny
+    assert find_movie_ids("Nonexistent Movie", df) == []

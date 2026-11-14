@@ -4,6 +4,7 @@ from sklearn.metrics.pairwise import linear_kernel
 
 from .config import PROCESSED_DATA_PATH
 from .data import load_movies
+from .embeddings import build_embeddings
 from .features import build_tags, fit_tfidf
 
 MOVIES_CACHE = PROCESSED_DATA_PATH / "movies.pkl"
@@ -53,7 +54,37 @@ def recommend_movies(movie_id, df, similarity, n=5):
     return result
 
 
+def recommend_embedding(movie_id, df, embeddings, n=5):
+    """Recommend movies using embedding similarity."""
+
+    matched = df.index[df["movie_id"] == movie_id]
+
+    if matched.empty:
+        raise KeyError(f"Movie id {movie_id} not found.")
+
+    index = matched[0]
+
+    scores = embeddings @ embeddings[index]
+
+    ranked_indices = np.argsort(scores)[::-1]
+    ranked_indices = [i for i in ranked_indices if i != index][:n]
+
+    result = df.iloc[ranked_indices][["movie_id", "title"]].copy()
+
+    result["score"] = scores[ranked_indices]
+
+    return result
+
+
 if __name__ == "__main__":
     df, similarity = build_recommender()
+
     movie_id = find_movie_ids("Interstellar", df)[0]
+
+    print("TF-IDF recommendations:")
     print(recommend_movies(movie_id, df, similarity))
+
+    embeddings = build_embeddings(df)
+
+    print("\nEmbedding recommendations:")
+    print(recommend_embedding(movie_id, df, embeddings))
