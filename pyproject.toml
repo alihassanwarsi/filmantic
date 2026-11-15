@@ -1,7 +1,7 @@
 [project]
 name = "filmantic"
 version = "0.1.0"
-   description = "Content-based movie recommender using spaCy, TF-IDF and sentence embeddings"
+description = "Content-based movie recommender using spaCy, TF-IDF and sentence embeddings"
 readme = "README.md"
 authors = [
     { name = "Ali Hassan Warsi", email = "contact.alix27@gmail.com" }
@@ -35,6 +35,3 @@ dev = [
     "pytest>=9.2.0",
     "ruff>=0.17.4",
 ]
-
-
-
