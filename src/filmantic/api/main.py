@@ -78,6 +78,45 @@ def get_recommendations(movie_id):
     return jsonify(results.to_dict(orient="records"))
 
 
+@app.get("/api/recommendations/discover")
+def discover_movies():
+    """Find movies based on matching genres and keywords."""
+    df, _, _ = load_data()
+
+    genres = request.args.get("genres", "").split(",")
+    keywords = request.args.get("keywords", "").split(",")
+
+    genres = [g.strip() for g in genres if g.strip()]
+    keywords = [k.strip() for k in keywords if k.strip()]
+
+    if not genres and not keywords:
+        abort(400, description="Enter at least one genre or keyword.")
+
+    results = df.copy()
+    results["match_count"] = 0
+
+    for genre in genres:
+        matches = results["genres"].str.contains(
+            genre, case=False, na=False, regex=False
+        )
+        results.loc[matches, "match_count"] += 1
+
+    for keyword in keywords:
+        matches = results["keywords"].str.contains(
+            keyword, case=False, na=False, regex=False
+        )
+        results.loc[matches, "match_count"] += 1
+
+    results = results[results["match_count"] > 0]
+    results = results.sort_values("match_count", ascending=False)
+
+    return jsonify(
+        results[["movie_id", "title", "genres", "keywords", "match_count"]]
+        .head(10)
+        .to_dict(orient="records")
+    )
+
+
 @app.errorhandler(400)
 @app.errorhandler(404)
 def handle_error(error):
