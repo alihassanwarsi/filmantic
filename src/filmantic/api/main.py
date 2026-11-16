@@ -1,28 +1,78 @@
+from pathlib import Path
+
 from flask import Flask, abort, jsonify, request
 
 from filmantic.embeddings import build_embeddings
+from filmantic.poster import get_poster_url
 from filmantic.recommender import build_recommender, recommend_hybrid
 
-app = Flask(__name__)
+FRONTEND_FOLDER = Path(__file__).resolve().parents[3] / "frontend"
+
+app = Flask(__name__, static_folder=str(FRONTEND_FOLDER), static_url_path="")
 
 df = None
 similarity = None
 embeddings = None
+all_genres = None
+all_keywords = None
 
 
 def load_data():
-    global df, similarity, embeddings
+    """Lazily build the recommender, embeddings, and genre/keyword indexes."""
+
+    global df, similarity, embeddings, all_genres, all_keywords
 
     if df is None:
         df, similarity = build_recommender()
         embeddings = build_embeddings(df)
+        all_genres = sorted({g for genres in df["genres"] for g in genres})
+        all_keywords = sorted({k for keywords in df["keywords"] for k in keywords})
 
     return df, similarity, embeddings
+
+
+def attach_posters(records):
+    """Mutate a list of movie records in place, adding a poster_url to each."""
+
+    for record in records:
+        record["poster_url"] = get_poster_url(record["movie_id"])
+
+    return records
+
+
+@app.get("/")
+def home():
+    return app.send_static_file("index.html")
 
 
 @app.get("/api/health")
 def health_check():
     return jsonify({"status": "ok"})
+
+
+@app.get("/api/genres")
+def list_genres():
+    """List every unique genre in the dataset, for the multi-select UI."""
+
+    load_data()
+
+    return jsonify(all_genres)
+
+
+@app.get("/api/keywords/suggest")
+def suggest_keywords():
+    """Suggest up to 10 keywords matching a partial query, for the tag input."""
+
+    load_data()
+
+    q = request.args.get("q", "").strip().lower()
+
+    if not q:
+        return jsonify([])
+
+    matches = [k for k in all_keywords if q in k.lower()][:10]
+
+    return jsonify(matches)
 
 
 @app.get("/api/movies/search")
@@ -54,7 +104,10 @@ def get_movie(movie_id):
     if movie.empty:
         abort(404, description="Movie not found")
 
-    return jsonify(movie.iloc[0].to_dict())
+    record = movie.iloc[0].to_dict()
+    record["poster_url"] = get_poster_url(movie_id)
+
+    return jsonify(record)
 
 
 @app.get("/api/recommendations/<int:movie_id>")
@@ -63,7 +116,7 @@ def get_recommendations(movie_id):
 
     df, similarity, embeddings = load_data()
 
-    n = request.args.get("n", default=10, type=int)
+    n = request.args.get("n", default=5, type=int)
 
     if n is None or n < 1 or n > 50:
         abort(400, description="Query parameter 'n' must be between 1 and 50.")
@@ -74,47 +127,58 @@ def get_recommendations(movie_id):
         abort(404, description="Movie not found")
 
     results = recommend_hybrid(movie_id, df, similarity, embeddings, n=n)
+    records = results.to_dict(orient="records")
+    attach_posters(records)
 
-    return jsonify(results.to_dict(orient="records"))
+    return jsonify(records)
 
 
 @app.get("/api/recommendations/discover")
 def discover_movies():
     """Find movies based on matching genres and keywords."""
+
     df, _, _ = load_data()
 
-    genres = request.args.get("genres", "").split(",")
-    keywords = request.args.get("keywords", "").split(",")
+    genres = [g.strip() for g in request.args.get("genres", "").split(",") if g.strip()]
+    keywords = [
+        k.strip() for k in request.args.get("keywords", "").split(",") if k.strip()
+    ]
 
-    genres = [g.strip() for g in genres if g.strip()]
-    keywords = [k.strip() for k in keywords if k.strip()]
+    n = request.args.get("n", default=5, type=int)
+
+    if n is None or n < 1 or n > 50:
+        abort(400, description="Query parameter 'n' must be between 1 and 50.")
 
     if not genres and not keywords:
         abort(400, description="Enter at least one genre or keyword.")
 
+    genre_set = {g.lower() for g in genres}
+    keyword_set = {k.lower() for k in keywords}
+
     results = df.copy()
     results["match_count"] = 0
 
-    for genre in genres:
-        matches = results["genres"].str.contains(
-            genre, case=False, na=False, regex=False
+    if genre_set:
+        results["match_count"] += results["genres"].apply(
+            lambda movie_genres: sum(1 for g in movie_genres if g.lower() in genre_set)
         )
-        results.loc[matches, "match_count"] += 1
 
-    for keyword in keywords:
-        matches = results["keywords"].str.contains(
-            keyword, case=False, na=False, regex=False
+    if keyword_set:
+        results["match_count"] += results["keywords"].apply(
+            lambda movie_keywords: sum(
+                1 for k in movie_keywords if k.lower() in keyword_set
+            )
         )
-        results.loc[matches, "match_count"] += 1
 
     results = results[results["match_count"] > 0]
-    results = results.sort_values("match_count", ascending=False)
+    results = results.sort_values("match_count", ascending=False).head(n)
 
-    return jsonify(
-        results[["movie_id", "title", "genres", "keywords", "match_count"]]
-        .head(10)
-        .to_dict(orient="records")
-    )
+    records = results[
+        ["movie_id", "title", "genres", "keywords", "match_count"]
+    ].to_dict(orient="records")
+    attach_posters(records)
+
+    return jsonify(records)
 
 
 @app.errorhandler(400)
