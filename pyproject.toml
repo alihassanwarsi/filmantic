@@ -1,7 +1,7 @@
 [project]
 name = "filmantic"
-version = "0.1.0"
-description = "Content-based movie recommender using spaCy, TF-IDF and sentence embeddings"
+version = "2.0.0"
+description = "Hybrid movie recommender using TF-IDF, sentence embeddings and Reciprocal Rank Fusion"
 readme = "README.md"
 authors = [
     { name = "Ali Hassan Warsi", email = "contact.alix27@gmail.com" }
@@ -20,9 +20,6 @@ dependencies = [
     "spacy>=3.8.18",
     "waitress>=3.0.2",
 ]
-
-[project.scripts]
-filmantic = "filmantic:main"
 
 [build-system]
 requires = ["uv_build>=0.13.5,<0.14.0"]
