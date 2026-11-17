@@ -59,6 +59,18 @@ def list_genres():
     return jsonify(all_genres)
 
 
+@app.get("/api/movies/catalog")
+def movie_catalog():
+    """Return all movie IDs and titles for the title dropdown."""
+    df, _, _ = load_data()
+
+    movies = df[["movie_id", "title"]].sort_values(
+        "title", key=lambda titles: titles.str.lower()
+    )
+
+    return jsonify(movies.to_dict(orient="records"))
+
+
 @app.get("/api/keywords/suggest")
 def suggest_keywords():
     """Suggest up to 10 keywords matching a partial query, for the tag input."""
@@ -128,6 +140,13 @@ def get_recommendations(movie_id):
 
     results = recommend_hybrid(movie_id, df, similarity, embeddings, n=n)
     records = results.to_dict(orient="records")
+
+    lookup = df.set_index("movie_id")
+    for record in records:
+        row = lookup.loc[record["movie_id"]]
+        record["genres"] = row.get("genres", [])
+        record["keywords"] = row.get("keywords", [])
+
     attach_posters(records)
 
     return jsonify(records)

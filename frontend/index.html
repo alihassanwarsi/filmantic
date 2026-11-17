@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Filmantic</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <a href="#" id="brand">Filmantic</a>
+  <nav>
+    <button class="nav active" data-view="search">Search</button>
+    <button class="nav" data-view="discover">Discover</button>
+  </nav>
+  <button id="randomBtn">Random Film</button>
+</header>
+
+<main>
+
+  <section id="searchView">
+    <h1>Find similar films</h1>
+    <div class="combobox">
+      <input id="titleInput" type="text" placeholder="Search movie titles" autocomplete="off">
+      <span id="titleSpinner" class="input-spinner" hidden></span>
+      <button id="clearTitle" hidden>&times;</button>
+      <ul id="titleDropdown" class="dropdown" hidden></ul>
+    </div>
+
+    <div id="seedBanner" class="seed" hidden>
+      <img id="seedPoster" alt="">
+      <div>
+        <h2 id="seedTitle"></h2>
+        <p id="seedGenres"></p>
+      </div>
+      <button id="clearSeed">Clear</button>
+    </div>
+
+    <div class="section-head">
+      <h2 id="searchHeading">Featured Picks</h2>
+      <span id="searchCount"></span>
+    </div>
+    <p id="searchError" class="error" hidden></p>
+    <p id="searchEmpty" class="empty" hidden>No matching titles.</p>
+    <div id="searchGrid" class="grid"></div>
+    <div id="searchMoreBar" class="more-bar" hidden>
+      <span id="searchMoreStatus"></span>
+      <button id="searchMoreBtn">Suggest More</button>
+    </div>
+  </section>
+
+  <section id="discoverView" hidden>
+    <h1>Discover by genre & keyword</h1>
+
+    <div id="genreBox" class="chips"></div>
+
+    <div class="combobox">
+      <input id="keywordInput" type="text" placeholder="Type a keyword..." autocomplete="off">
+      <ul id="keywordDropdown" class="dropdown" hidden></ul>
+    </div>
+    <div id="selectedKeywords" class="chips"></div>
+
+    <div class="actions">
+      <button id="discoverBtn">Find Films</button>
+      <button id="discoverClearBtn" hidden>Clear all</button>
+      <span id="discoverHint" class="hint"></span>
+    </div>
+
+    <div class="section-head">
+      <h2 id="discoverHeading">Matching Films</h2>
+      <span id="discoverCount"></span>
+    </div>
+    <p id="discoverError" class="error" hidden></p>
+    <p id="discoverEmpty" class="empty">Select genres or keywords and click Find Films.</p>
+    <div id="discoverGrid" class="grid"></div>
+    <div id="discoverMoreBar" class="more-bar" hidden>
+      <span id="discoverMoreStatus"></span>
+      <button id="discoverMoreBtn">Suggest More</button>
+    </div>
+  </section>
+
+</main>
+
+<dialog id="modal">
+  <button id="modalClose">&times;</button>
+  <div class="modal-body">
+    <img id="modalPoster" alt="">
+    <div>
+      <h2 id="modalTitle"></h2>
+      <p id="modalOverview"></p>
+      <p id="modalDirector"></p>
+      <p id="modalCast"></p>
+      <p id="modalGenres"></p>
+      <p id="modalKeywords"></p>
+    </div>
+  </div>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
