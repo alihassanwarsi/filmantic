@@ -207,4 +207,8 @@ def handle_error(error):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    from waitress import serve
+
+    load_data()
+    print("Filmantic running at http://127.0.0.1:5000 (Ctrl+C to stop)")
+    serve(app, host="127.0.0.1", port=5000)
